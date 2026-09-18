@@ -94,8 +94,7 @@ settings/
   Default font size     = 16
   Fixed-width font size = 13
   Minimum font size     = 0
-
-```
+  ```
 
 - 32 吋 4K / 3840×2160：
 
