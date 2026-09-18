@@ -5,7 +5,7 @@
 本專案提供：
 
 - `Install-NotoCJKFonts.ps1`：自動下載並安裝 Noto CJK 字型
-- `Advanced_Font_Settings_Noto_CJK_TC_SC_JP.json`：Advanced Font Settings 匯入設定
+- `settings/Advanced_Font_Settings_v1.0.0_Noto_CJK_UnifiedTC_32inch_2K.json`：Advanced Font Settings 匯入設定
 - 預設安裝 TC、SC、JP
 - 安裝 Sans 時會同時安裝 Mono
 
@@ -45,10 +45,26 @@ https://github.com/notofonts/noto-cjk/releases/download/Serif2.003/03_NotoSerifC
 
 ## 專案結構
 
-```text
-noto_cjk_windows_installer_v2/
+```
+
+### `settings/` 資料夾
+
+`settings/` 專門保存 Advanced Font Settings v1.0.0 可直接匯入的顯示器 profile。
+
+目前提供：
+
+| Profile | 建議尺寸 / 解析度 | Default | Fixed | Minimum |
+|---|---|---:|---:|---:|
+| `Advanced_Font_Settings_v1.0.0_Noto_CJK_UnifiedTC_32inch_2K.json` | 32 吋 / 2560×1440 | 16 | 13 | 0 |
+| `Advanced_Font_Settings_v1.0.0_Noto_CJK_UnifiedTC_32inch_4K.json` | 32 吋 / 3840×2160 | 18 | 15 | 10 |
+
+兩個 profile 都採用 Unified TC 策略：`Zyyy`、`Hant`、`Hans` 優先使用 Noto CJK TC，以降低繁簡混排時出現不同 fallback 字型的機率；`Jpan` 則保留 Noto CJK JP。
+text
+noto_cjk_windows_installer/
 ├── Install-NotoCJKFonts.ps1
-├── Advanced_Font_Settings_Noto_CJK_TC_SC_JP.json
+├── settings/
+│   ├── settings/Advanced_Font_Settings_v1.0.0_Noto_CJK_UnifiedTC_32inch_2K.json
+│   └── settings/Advanced_Font_Settings_v1.0.0_Noto_CJK_UnifiedTC_32inch_4K.json
 └── README.md
 ```
 
@@ -111,7 +127,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 本專案提供：
 
 ```text
-Advanced_Font_Settings_Noto_CJK_TC_SC_JP.json
+settings/Advanced_Font_Settings_v1.0.0_Noto_CJK_UnifiedTC_32inch_2K.json
 ```
 
 建議對應如下：
@@ -188,10 +204,232 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
 1. 字型是否安裝完成
 2. 是否重新啟動 Chrome / Edge
-3. 是否匯入 `Advanced_Font_Settings_Noto_CJK_TC_SC_JP.json`
+3. 是否匯入 `settings/Advanced_Font_Settings_v1.0.0_Noto_CJK_UnifiedTC_32inch_2K.json`
 4. Windows 字型清單是否能搜尋到 `Noto Sans CJK`
 
 ---
+
+
+---
+
+## 選用瀏覽器插件
+
+本專案建議搭配 **Advanced Font Settings** 使用，用來指定不同語系 script 的預設字型與字體大小。
+
+目前建議優先使用仍有維護、且支援 JSON 匯入/匯出的版本：
+
+```text
+Advanced Font Settings v1.0.0
+```
+
+Chrome Web Store：
+
+[https://chromewebstore.google.com/detail/lnclooleldbpcjljnlhiebkmecplicpa?utm_source=item-share-cb](https://chromewebstore.google.com/detail/lnclooleldbpcjljnlhiebkmecplicpa?utm_source=item-share-cb)
+
+新版的設定格式與舊版不同，主要結構如下：
+
+```json
+{
+  "version": 1,
+  "fonts": {
+    "Zyyy|standard": "Noto Sans CJK TC",
+    "Hant|standard": "Noto Sans CJK TC",
+    "Hans|standard": "Noto Sans CJK TC",
+    "Jpan|standard": "Noto Sans CJK JP"
+  },
+  "sizes": {
+    "default": 16,
+    "fixed": 13,
+    "minimum": 0
+  }
+}
+```
+
+### 建議設定策略
+
+為了減少繁體、簡體混排時出現不同 fallback 字型，建議：
+
+```text
+Default / Zyyy → Noto Sans CJK TC
+Hant           → Noto Sans CJK TC
+Hans           → Noto Sans CJK TC
+Jpan           → Noto Sans CJK JP
+```
+
+對應 Serif 與 Monospace：
+
+```text
+Traditional Chinese:
+  Serif      → Noto Serif CJK TC
+  Monospace  → Noto Sans Mono CJK TC
+
+Simplified Chinese:
+  Serif      → Noto Serif CJK TC
+  Monospace  → Noto Sans Mono CJK TC
+
+Japanese:
+  Serif      → Noto Serif CJK JP
+  Monospace  → Noto Sans Mono CJK JP
+```
+
+> 注意：將 Hans 也指向 TC 是刻意的設定，用來優先追求繁簡混排時的視覺一致性。  
+> 如果更重視簡體中文的地區字形正確性，可以改回 `Noto Sans CJK SC / Noto Serif CJK SC / Noto Sans Mono CJK SC`。
+
+### Cursive / Fantasy
+
+這兩個 generic family 一般不需要特別修改：
+
+```text
+Cursive → 保留系統預設，例如 標楷體 / KaiTi
+Fantasy → 保留系統預設，例如 Impact
+```
+
+---
+
+## 2K / 4K 字體大小客製化
+
+Advanced Font Settings v1.0.0 的字體大小設定位於：
+
+```json
+"sizes": {
+  "default": 16,
+  "fixed": 13,
+  "minimum": 0
+}
+```
+
+三個欄位分別代表：
+
+| 欄位 | 說明 |
+|---|---|
+| `default` | 一般比例字型的預設大小 |
+| `fixed` | 等寬字型 / Monospace 的預設大小 |
+| `minimum` | 瀏覽器允許顯示的最小字體大小 |
+
+本專案建議依螢幕解析度使用不同 profile。
+
+### 32" 2K 建議值
+
+適合 2560×1440、32 吋螢幕：
+
+```json
+"sizes": {
+  "default": 16,
+  "fixed": 13,
+  "minimum": 0
+}
+```
+
+建議搭配：
+
+```text
+Windows 縮放：100%～125%
+Chrome / Edge 頁面縮放：100%
+```
+
+對應設定檔：
+
+```text
+settings/Advanced_Font_Settings_v1.0.0_Noto_CJK_UnifiedTC_32inch_2K.json
+```
+
+### 32" 4K 建議值
+
+適合 3840×2160、32 吋螢幕：
+
+```json
+"sizes": {
+  "default": 18,
+  "fixed": 15,
+  "minimum": 10
+}
+```
+
+建議搭配：
+
+```text
+Windows 縮放：125%～150%
+Chrome / Edge 頁面縮放：100%
+```
+
+對應設定檔：
+
+```text
+settings/Advanced_Font_Settings_v1.0.0_Noto_CJK_UnifiedTC_32inch_4K.json
+```
+
+### 為什麼 4K 不直接把字體加倍？
+
+Advanced Font Settings 的字體大小是 CSS pixel 邏輯，Windows DPI scaling 已經會先放大整體 UI。
+
+因此 32" 4K 不需要把：
+
+```text
+16px → 32px
+```
+
+而是通常只需要調整成：
+
+```text
+16px → 18px
+13px → 15px
+```
+
+就能獲得比較舒服的閱讀大小。
+
+### Minimum font size 建議
+
+2K profile 預設：
+
+```text
+minimum = 0
+```
+
+可以最大程度避免破壞網站排版。
+
+4K profile 建議：
+
+```text
+minimum = 10
+```
+
+可以避免部分網站把註解、標籤、時間資訊顯示得過小。
+
+不建議把 minimum 設得太高，例如 12～14px，因為可能造成：
+
+```text
+表格高度改變
+按鈕跑版
+側邊欄變寬
+網站原本的小字資訊被放大
+```
+
+---
+
+## 建議使用流程
+
+新系統建議依序：
+
+```text
+1. 執行 Install-NotoCJKFonts.ps1
+2. 安裝 Advanced Font Settings v1.0.0
+3. 依螢幕選擇 2K 或 4K JSON profile
+4. 匯入 JSON
+5. 關閉並重新開啟 Chrome / Edge
+```
+
+32" 2K：
+
+```text
+settings/Advanced_Font_Settings_v1.0.0_Noto_CJK_UnifiedTC_32inch_2K.json
+```
+
+32" 4K：
+
+```text
+settings/Advanced_Font_Settings_v1.0.0_Noto_CJK_UnifiedTC_32inch_4K.json
+```
+
 
 ## 授權
 
